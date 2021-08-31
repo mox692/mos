@@ -59,6 +59,7 @@ class BGRResv8BitPerColorPixelWriter : public PixelWriter {
 // #@@range_end(derived_pixel_writer)
 
 // #@@range_begin(placement_new)
+// TODO: 調べる
 void* operator new(size_t size, void* buf) {
   return buf;
 }
