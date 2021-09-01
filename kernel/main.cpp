@@ -2,12 +2,10 @@
 #include <cstddef>
 #include <cstdio>
 #include "frame_buffer_config.hpp"
-// #@@range_begin(includes)
 #include "graphics.hpp"
 #include "font.hpp"
-// #@@range_end(includes)
+#include "console.hpp"
 
-// #@@range_begin(placement_new)
 // TODO: 調べる
 void* operator new(size_t size, void* buf) {
   return buf;
@@ -32,28 +30,20 @@ extern "C" void KernelMain(const FrameBufferConfig& frame_buffer_config) {
         BGRResv8BitPerColorPixelWriter{frame_buffer_config};
       break;
   }
-  // write all pixel white.
+  // write all pixel green.
   for (int x = 0; x < frame_buffer_config.horizontal_resolution; ++x) {
     for (int y = 0; y < frame_buffer_config.vertical_resolution; ++y) {
       pixel_writer->Write(x, y, {25, 255, 15});
     }
   }
-  // write green reqtangle (100 < x < 300, 100 < y < 200).
-  for (int x = 0; x < 200; ++x) {
-    for (int y = 0; y < 100; ++y) {
-      pixel_writer->Write(x + 200, y + 400, {255, 0, 0});
-    }
-  }
 
-  int i = 0;
-  for (char c = '!'; c <= '~'; ++c, ++i) {
-    // MEMO: 1char当たり8pixel
-    WriteAscii(*pixel_writer, 8 * i, 50, c, {0, 0, 0});
-  }
-  WriteString(*pixel_writer, 0, 66, "Hello, world!", {0, 0, 255});
+  Console console{*pixel_writer, {0, 0, 0}, {255, 255, 255}}; 
+
   char buf[128];
-  sprintf(buf, "1 + 2 = %d", 1 + 2);
-  WriteString(*pixel_writer, 0, 82, buf, {0, 0, 0});
+  for (int i = 0; i < 227; ++i) {
+    sprintf(buf, "line %d\n", i);
+    console.PutString(buf);
+  }
 
   while (1) __asm__("hlt");
 }
