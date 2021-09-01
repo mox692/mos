@@ -1,5 +1,6 @@
 #include <cstdint>
 #include <cstddef>
+#include <cstdio>
 #include "frame_buffer_config.hpp"
 // #@@range_begin(includes)
 #include "graphics.hpp"
@@ -34,7 +35,7 @@ extern "C" void KernelMain(const FrameBufferConfig& frame_buffer_config) {
   // write all pixel white.
   for (int x = 0; x < frame_buffer_config.horizontal_resolution; ++x) {
     for (int y = 0; y < frame_buffer_config.vertical_resolution; ++y) {
-      pixel_writer->Write(x, y, {255, 255, 255});
+      pixel_writer->Write(x, y, {25, 255, 15});
     }
   }
   // write green reqtangle (100 < x < 300, 100 < y < 200).
@@ -44,12 +45,15 @@ extern "C" void KernelMain(const FrameBufferConfig& frame_buffer_config) {
     }
   }
 
-  // #@@range_begin(write_fonts)
   int i = 0;
   for (char c = '!'; c <= '~'; ++c, ++i) {
+    // MEMO: 1char当たり8pixel
     WriteAscii(*pixel_writer, 8 * i, 50, c, {0, 0, 0});
   }
-  // #@@range_end(write_fonts)
+  WriteString(*pixel_writer, 0, 66, "Hello, world!", {0, 0, 255});
+  char buf[128];
+  sprintf(buf, "1 + 2 = %d", 1 + 2);
+  WriteString(*pixel_writer, 0, 82, buf, {0, 0, 0});
 
   while (1) __asm__("hlt");
 }
