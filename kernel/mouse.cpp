@@ -32,6 +32,7 @@ namespace {
     "         @@@   ",
   };
 
+  // mouseカーソルを描画.
   void DrawMouseCursor(PixelWriter* pixel_writer, Vector2D<int> position) {
     for (int dy = 0; dy < kMouseCursorHeight; ++dy) {
       for (int dx = 0; dx < kMouseCursorWidth; ++dx) {
@@ -56,12 +57,13 @@ namespace {
   }
 }
 
-// #@@range_begin(mouse_class)
+// constructor
 MouseCursor::MouseCursor(PixelWriter* writer, PixelColor erase_color,
                          Vector2D<int> initial_position)
     : pixel_writer_{writer},
       erase_color_{erase_color},
       position_{initial_position} {
+  
   DrawMouseCursor(pixel_writer_, position_);
 }
 

@@ -321,6 +321,7 @@ namespace usb::xhci {
             cap_->HCSPARAMS1.Read().bits.max_ports)} {
   }
 
+  // TODO: read
   Error Controller::Initialize() {
     if (auto err = devmgr_.Initialize(kDeviceSize)) {
       return err;
@@ -397,6 +398,7 @@ namespace usb::xhci {
     return MAKE_ERROR(Error::kSuccess);
   }
 
+  // TODO: read
   Error Controller::Run() {
     // Run the controller
     auto usbcmd = op_->USBCMD.Read();
@@ -485,6 +487,8 @@ namespace usb::xhci {
     return MAKE_ERROR(Error::kSuccess);
   }
 
+  // xhcに対して問合せ、溜まってるeventを処理する.
+  // TODO: read
   Error ProcessEvent(Controller& xhc) {
     if (!xhc.PrimaryEventRing()->HasFront()) {
       return MAKE_ERROR(Error::kSuccess);

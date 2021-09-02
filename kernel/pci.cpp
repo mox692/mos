@@ -205,6 +205,7 @@ namespace pci {
     const auto bar = ReadConfReg(device, addr);
 
     // 32 bit address
+    // MEMO: なんでこれで32bit addrかどうかわかる??
     if ((bar & 4u) == 0) {
       return {bar, MAKE_ERROR(Error::kSuccess)};
     }
@@ -214,8 +215,10 @@ namespace pci {
       return {0, MAKE_ERROR(Error::kIndexOutOfRange)};
     }
 
+    // MEMO: 次のBARを読む
     const auto bar_upper = ReadConfReg(device, addr + 4);
     return {
+      // MEMO: addr結合
       bar | (static_cast<uint64_t>(bar_upper) << 32),
       MAKE_ERROR(Error::kSuccess)
     };
