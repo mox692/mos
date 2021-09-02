@@ -30,17 +30,15 @@ namespace {
 
   // #@@range_begin(add_device)
   /** @brief devices[num_device] に情報を書き込み num_device をインクリメントする． */
-  Error AddDevice(uint8_t bus, uint8_t device,
-                  uint8_t function, uint8_t header_type) {
-    // 現在の仕様だと32 = 32になる時？
+  Error AddDevice(const Device& device) {
     if (num_device == devices.size()) {
-      return Error::kFull;
+      return MAKE_ERROR(Error::kFull);
     }
 
-    // Deviceを追加!!!
-    devices[num_device] = Device{bus, device, function, header_type};
+    // デバイス追加!!
+    devices[num_device] = device;
     ++num_device;
-    return Error::kSuccess;
+    return MAKE_ERROR(Error::kSuccess);
   }
   // #@@range_end(add_device)
 
@@ -51,24 +49,21 @@ namespace {
    * もし PCI-PCI ブリッジなら，セカンダリバスに対し ScanBus を実行する
    */
   Error ScanFunction(uint8_t bus, uint8_t device, uint8_t function) {
+    auto class_code = ReadClassCode(bus, device, function);
     auto header_type = ReadHeaderType(bus, device, function);
-    // TODO: [指定のファンクションを devices に追加する．]ってどういうこと??
-    if (auto err = AddDevice(bus, device, function, header_type)) {
+    Device dev{bus, device, function, header_type, class_code};
+    if (auto err = AddDevice(dev)) {
       return err;
     }
 
-    auto class_code = ReadClassCode(bus, device, function);
-    uint8_t base = (class_code >> 24) & 0xffu;
-    uint8_t sub = (class_code >> 16) & 0xffu;
-
-    if (base == 0x06u && sub == 0x04u) {
+    if (class_code.Match(0x06u, 0x04u)) {
       // standard PCI-PCI bridge
       auto bus_numbers = ReadBusNumbers(bus, device, function);
       uint8_t secondary_bus = (bus_numbers >> 8) & 0xffu;
       return ScanBus(secondary_bus);
     }
 
-    return Error::kSuccess;
+    return MAKE_ERROR(Error::kSuccess);
   }
   // #@@range_end(scan_function)
 
@@ -83,7 +78,7 @@ namespace {
     }
     // rootに対して行ったcheckと同じ事してる
     if (IsSingleFunctionDevice(ReadHeaderType(bus, device, 0))) {
-      return Error::kSuccess;
+      return MAKE_ERROR(Error::kSuccess);
     }
 
     for (uint8_t function = 1; function < 8; ++function) {
@@ -94,7 +89,7 @@ namespace {
         return err;
       }
     }
-    return Error::kSuccess;
+    return MAKE_ERROR(Error::kSuccess);
   }
   // #@@range_end(scan_device)
 
@@ -112,7 +107,7 @@ namespace {
         return err;
       }
     }
-    return Error::kSuccess;
+    return MAKE_ERROR(Error::kSuccess);
   }
   // #@@range_end(scan_bus)
 }
@@ -146,9 +141,14 @@ namespace pci {
     return (ReadData() >> 16) & 0xffu;
   }
 
-  uint32_t ReadClassCode(uint8_t bus, uint8_t device, uint8_t function) {
+  ClassCode ReadClassCode(uint8_t bus, uint8_t device, uint8_t function) {
     WriteAddress(MakeAddress(bus, device, function, 0x08));
-    return ReadData();
+    auto reg = ReadData();
+    ClassCode cc;
+    cc.base       = (reg >> 24) & 0xffu;
+    cc.sub        = (reg >> 16) & 0xffu;
+    cc.interface  = (reg >> 8)  & 0xffu;
+    return cc;
   }
 
   uint32_t ReadBusNumbers(uint8_t bus, uint8_t device, uint8_t function) {
@@ -174,7 +174,7 @@ namespace pci {
     }
 
     // MEMO: なぜbus0は読まない?
-    for (uint8_t function = 1; function < 8; ++function) {
+    for (uint8_t function = 0; function < 8; ++function) {
       // 有効なfunctionかどうかを判定.
       if (ReadVendorId(0, 0, function) == 0xffffu) {
         continue;
@@ -183,6 +183,41 @@ namespace pci {
         return err;
       }
     }
-    return Error::kSuccess;
+    return MAKE_ERROR(Error::kSuccess);
+  }
+
+  uint32_t ReadConfReg(const Device& dev, uint8_t reg_addr) {
+    WriteAddress(MakeAddress(dev.bus, dev.device, dev.function, reg_addr));
+    return ReadData();
+  }
+
+  void WriteConfReg(const Device& dev, uint8_t reg_addr, uint32_t value) {
+    WriteAddress(MakeAddress(dev.bus, dev.device, dev.function, reg_addr));
+    WriteData(value);
+  }
+
+  WithError<uint64_t> ReadBar(Device& device, unsigned int bar_index) {
+    if (bar_index >= 6) {
+      return {0, MAKE_ERROR(Error::kIndexOutOfRange)};
+    }
+
+    const auto addr = CalcBarAddress(bar_index);
+    const auto bar = ReadConfReg(device, addr);
+
+    // 32 bit address
+    if ((bar & 4u) == 0) {
+      return {bar, MAKE_ERROR(Error::kSuccess)};
+    }
+
+    // 64 bit address
+    if (bar_index >= 5) {
+      return {0, MAKE_ERROR(Error::kIndexOutOfRange)};
+    }
+
+    const auto bar_upper = ReadConfReg(device, addr + 4);
+    return {
+      bar | (static_cast<uint64_t>(bar_upper) << 32),
+      MAKE_ERROR(Error::kSuccess)
+    };
   }
 }

@@ -1,12 +1,10 @@
 #pragma once
 
-// #@@range_begin(pixel_color_def)
 #include "frame_buffer_config.hpp"
 
 struct PixelColor {
   uint8_t r, g, b;
 };
-// #@@range_end(pixel_color_def)
 
 class PixelWriter {
  public:
@@ -24,13 +22,9 @@ class PixelWriter {
   const FrameBufferConfig& config_;
 };
 
-// #@@range_begin(pixel_writer_def)
 class RGBResv8BitPerColorPixelWriter : public PixelWriter {
  public:
-  // MEMO: PixelWriterのconstructor(PixelWriter)を使用.
   using PixelWriter::PixelWriter;
-
-  // MEMO: interfaceの実装
   virtual void Write(int x, int y, const PixelColor& c) override;
 };
 
@@ -40,10 +34,19 @@ class BGRResv8BitPerColorPixelWriter : public PixelWriter {
   virtual void Write(int x, int y, const PixelColor& c) override;
 };
 
+// #@@range_begin(vector2d)
 template <typename T>
 struct Vector2D {
   T x, y;
+
+  template <typename U>
+  Vector2D<T>& operator +=(const Vector2D<U>& rhs) {
+    x += rhs.x;
+    y += rhs.y;
+    return *this;
+  }
 };
+// #@@range_end(vector2d)
 
 void DrawRectangle(PixelWriter& writer, const Vector2D<int>& pos,
                    const Vector2D<int>& size, const PixelColor& c);
