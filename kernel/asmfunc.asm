@@ -19,16 +19,16 @@ IoIn32:
     in eax, dx
     ret
 
-// MEMO: csレジスタ(16bitの値で、現在のcodeセグメントを指す)の内容を返す.
-// ref: https://stackoverflow.com/questions/17777146/what-is-the-purpose-of-cs-and-ip-registers-in-intel-8086-assembly
+; MEMO: csレジスタ(16bitの値で、現在のcodeセグメントを指す)の内容を返す.
+; ref: https://stackoverflow.com/questions/17777146/what-is-the-purpose-of-cs-and-ip-registers-in-intel-8086-assembly
 global GetCS  ; uint16_t GetCS(void);
 GetCS:
     xor eax, eax  ; also clears upper 32 bits of rax
     mov ax, cs
     ret
 
-// MEMO: メインメモリ上のidtのアドレスと、idtの大きさを
-//       10byteの領域に書き込む. (ref: p168)
+; MEMO: メインメモリ上のidtのアドレスと、idtの大きさを
+;       10byteの領域に書き込む. (ref: p168)
 global LoadIDT  ; void LoadIDT(uint16_t limit, uint64_t offset);
 LoadIDT:
     push rbp

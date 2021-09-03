@@ -309,6 +309,7 @@ namespace pci {
     return header;
   }
 
+  // TODO: read.
   Error ConfigureMSI(const Device& dev, uint32_t msg_addr, uint32_t msg_data,
                      unsigned int num_vector_exponent) {
     uint8_t cap_addr = ReadConfReg(dev, 0x34) & 0xffu;
@@ -335,6 +336,7 @@ namespace pci {
       const Device& dev, uint8_t apic_id,
       MSITriggerMode trigger_mode, MSIDeliveryMode delivery_mode,
       uint8_t vector, unsigned int num_vector_exponent) {
+     // message addressの20:12にAPCI IDをいれることになっている
     uint32_t msg_addr = 0xfee00000u | (apic_id << 12);
     uint32_t msg_data = (static_cast<uint32_t>(delivery_mode) << 8) | vector;
     if (trigger_mode == MSITriggerMode::kLevel) {
