@@ -11,16 +11,11 @@
 #include  <Guid/FileInfo.h>
 #include  "frame_buffer_config.hpp"
 #include  "elf.hpp"
+#include  "memory_map.hpp"
 
-struct MemoryMap {
-  UINTN buffer_size;
-  VOID* buffer;
-  UINTN map_size;
-  UINTN map_key;
-  UINTN descriptor_size;
-  UINT32 descriptor_version;
-};
 
+// UEFIブートローダからmemory mapを取得する.
+// 引数で渡したmemorymapインスタンスにそのままmapされる
 EFI_STATUS GetMemoryMap(struct MemoryMap* map) {
   if (map->buffer == NULL) {
     return EFI_BUFFER_TOO_SMALL;
@@ -199,6 +194,7 @@ EFI_STATUS EFIAPI UefiMain(
   /* get memory map */
   CHAR8 memmap_buf[4096 * 4];
   struct MemoryMap memmap = {sizeof(memmap_buf), memmap_buf, 0, 0, 0, 0};
+  // memory mapを取得
   GetMemoryMap(&memmap);
 
   EFI_FILE_PROTOCOL* root_dir;
@@ -334,10 +330,10 @@ EFI_STATUS EFIAPI UefiMain(
   }
 
   // kernelへ渡す引数の型を指定
-  typedef void EntryPointType(const struct FrameBufferConfig*);
+  typedef void EntryPointType(const struct FrameBufferConfig*,
+                              const struct MemoryMap*);
   EntryPointType* entry_point = (EntryPointType*)entry_addr;
-  entry_point(&config);
-  // #@@range_end(call_kernel)
+  entry_point(&config, &memmap);
 
   /* これは表示されない */
   Print(L"All done\n");
