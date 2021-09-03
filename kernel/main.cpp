@@ -78,6 +78,7 @@ void SwitchEhci2Xhci(const pci::Device& xhc_dev) {
 
 usb::xhci::Controller* xhc;
 
+// MEMO: __attribute__((interrupt))で割り込みハンドラであることをcompilerに伝える.
 __attribute__((interrupt))
 void IntHandlerXHCI(InterruptFrame* frame) {
   while (xhc->PrimaryEventRing()->HasFront()) {
@@ -91,6 +92,9 @@ void IntHandlerXHCI(InterruptFrame* frame) {
 
 // const参照型
 extern "C" void KernelMain(const FrameBufferConfig& frame_buffer_config) {
+  /* 
+    画面描画の設定 
+  */
   switch (frame_buffer_config.pixel_format) {
     case kPixelRGBResv8BitPerColor:
       // MEMO: 配置newでインスタンスのためのmemoryを確保.
@@ -122,7 +126,9 @@ extern "C" void KernelMain(const FrameBufferConfig& frame_buffer_config) {
                 {10, kFrameHeight - 40},
                 {30, 30},
                 {160, 160, 160});
-
+  /* 
+    consoleの設定
+  */
   console = new(console_buf) Console{
     *pixel_writer, kDesktopFGColor, kDesktopBGColor
   };
@@ -130,6 +136,9 @@ extern "C" void KernelMain(const FrameBufferConfig& frame_buffer_config) {
 
   SetLogLevel(kWarn);
 
+  /* 
+    マウス・デバイスの設定
+  */
   // この段階でcursorが出現する(?)
   mouse_cursor = new(mouse_cursor_buf) MouseCursor{
     pixel_writer, kDesktopBGColor, {300, 200}
@@ -140,6 +149,7 @@ extern "C" void KernelMain(const FrameBufferConfig& frame_buffer_config) {
 
   Log(kDebug, "ScanAllBus: %s\n", err.Name());
 
+  // scanされたDeviceを一覧表示
   for (int i = 0; i < pci::num_device; ++i) {
     const auto& dev = pci::devices[i];
     auto vendor_id = pci::ReadVendorId(dev);
@@ -169,21 +179,25 @@ extern "C" void KernelMain(const FrameBufferConfig& frame_buffer_config) {
         xhc_dev->bus, xhc_dev->device, xhc_dev->function);
   }
 
-  // #@@range_begin(load_idt)
+  /* 
+    割り込みの設定.
+  */
   const uint16_t cs = GetCS();
+  // MEMO: IDTにXHCIのエントリを追加
   SetIDTEntry(idt[InterruptVector::kXHCI], MakeIDTAttr(DescriptorType::kInterruptGate, 0),
               reinterpret_cast<uint64_t>(IntHandlerXHCI), cs);
   LoadIDT(sizeof(idt) - 1, reinterpret_cast<uintptr_t>(&idt[0]));
-  // #@@range_end(load_idt)
 
-  // #@@range_begin(configure_msi)
+  /* 
+    MSI割り込みの設定.
+  */
+  // 0xfee00020の31:24にLocal APCI IDがある.(ref;p170)
   const uint8_t bsp_local_apic_id =
     *reinterpret_cast<const uint32_t*>(0xfee00020) >> 24;
   pci::ConfigureMSIFixedDestination(
       *xhc_dev, bsp_local_apic_id,
       pci::MSITriggerMode::kLevel, pci::MSIDeliveryMode::kFixed,
       InterruptVector::kXHCI, 0);
-  // #@@range_end(configure_msi)
 
   // MEMO: MMIOアドレスを取得するためにbar0を読む
   const WithError<uint64_t> xhc_bar = pci::ReadBar(*xhc_dev, 0);

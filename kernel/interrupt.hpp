@@ -21,34 +21,34 @@ enum class DescriptorType {
 };
 // #@@range_end(desc_types)
 
-// #@@range_begin(descriptor_attr_struct)
+// 割り込み記述子の属性を表現.
+// bit fieldを用いているので、全体のsizeとしては16bit.
 union InterruptDescriptorAttribute {
   uint16_t data;
   struct {
     uint16_t interrupt_stack_table : 3;
     uint16_t : 5;
-    DescriptorType type : 4;
+    DescriptorType type : 4;                  // trap gate or interrupt gate
     uint16_t : 1;
-    uint16_t descriptor_privilege_level : 2;
+    uint16_t descriptor_privilege_level : 2;  // DPL(割り込みハンドラの実行権限)の設定
     uint16_t present : 1;
-  } __attribute__((packed)) bits;
-} __attribute__((packed));
-// #@@range_end(descriptor_attr_struct)
+  } __attribute__((packed)) bits; // !! bit field
+} __attribute__((packed));        // !! No align
 
-// #@@range_begin(descriptor_struct)
+// Interrupt Descriptorの定義.
+// ref: p166.
 struct InterruptDescriptor {
-  uint16_t offset_low;
-  uint16_t segment_selector;
-  InterruptDescriptorAttribute attr;
-  uint16_t offset_middle;
-  uint32_t offset_high;
+  uint16_t offset_low;                // 割り込みハンドラの格納場所(64bit addr)のうちの16bit
+  uint16_t segment_selector;          // 割り込みが発生した際のコードセグメント(csレジスタの値)を格納.(復帰する際に戻るため??ref: p166)
+  InterruptDescriptorAttribute attr;  // 割り込み記述子の属性を表現
+  uint16_t offset_middle;             // 割り込みハンドラの格納場所(64bit addr)のうちの16bit
+  uint32_t offset_high;               // 割り込みハンドラの格納場所(64bit addr)のうちの32bit(highだけ32bit)
   uint32_t reserved;
 } __attribute__((packed));
-// #@@range_end(descriptor_struct)
 
 extern std::array<InterruptDescriptor, 256> idt;
 
-// #@@range_begin(make_idt_attr)
+// InterruptDescriptorAttributeのメンバを埋める関数.
 constexpr InterruptDescriptorAttribute MakeIDTAttr(
     DescriptorType type,
     uint8_t descriptor_privilege_level,
@@ -61,7 +61,6 @@ constexpr InterruptDescriptorAttribute MakeIDTAttr(
   attr.bits.present = present;
   return attr;
 }
-// #@@range_end(make_idt_attr)
 
 void SetIDTEntry(InterruptDescriptor& desc,
                  InterruptDescriptorAttribute attr,
