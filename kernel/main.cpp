@@ -171,7 +171,9 @@ extern "C" void KernelMainNewStack(
   // MEMO: efi memory discriptor毎のloop
   const auto memory_map_base = reinterpret_cast<uintptr_t>(memory_map.buffer);
 
+  // ????
   uintptr_t available_end = 0;
+  // MEMO: 各memory descriptor毎にscanしてる
   for (uintptr_t iter = memory_map_base;
        iter < memory_map_base + memory_map.map_size;
        iter += memory_map.descriptor_size) {
@@ -193,6 +195,7 @@ extern "C" void KernelMainNewStack(
     }
   }
   memory_manager->SetMemoryRange(FrameID{1}, FrameID{available_end / kBytesPerFrame});
+  printk("SetMemoryRange Done!!\n");
 
   /* 
     マウス・デバイスの設定

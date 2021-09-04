@@ -53,9 +53,8 @@ LoadGDT:
     mov rsp, rbp
     pop rbp
     ret
-; #@@range_end(load_gdt)
 
-; #@@range_begin(set_cs)
+; csを直接operandに取れないのでトリッキーな手法でcsレジスタを入れ替える
 global SetCSSS  ; void SetCSSS(uint16_t cs, uint16_t si);
 SetCSSS:
     push rbp
@@ -70,6 +69,7 @@ SetCSSS:
     pop rbp
     ret
 
+; これらのregisterは64bit modeでは実際ほぼ使われないらしい.
 global SetDSAll  ; void SetDSAll(uint16_t value);
 SetDSAll:
     mov ds, di

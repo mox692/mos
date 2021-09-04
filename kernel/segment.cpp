@@ -48,8 +48,11 @@ void SetupSegments() {
   gdt[0].data = 0;
   // MEMO: 全てbase 0だと、segment領域が被ってそうだが...。
   //       このあたりはpagingを理解するとわかる?
+  //       Segmentはとりあえずgdtに設定しておいて、
+  //       その後にgdtに対してリニアアドレスを割り振ってるのかな.
   SetCodeSegment(gdt[1], DescriptorType::kExecuteRead, 0, 0, 0xfffff);
   SetDataSegment(gdt[2], DescriptorType::kReadWrite, 0, 0, 0xfffff);
+  // これを実行した瞬間にgdtがBIOS由来のものからOSのものに変更される.
   LoadGDT(sizeof(gdt) - 1, reinterpret_cast<uintptr_t>(&gdt[0]));
 }
 // #@@range_end(setup_segm_function)
