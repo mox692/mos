@@ -11,7 +11,6 @@
 
 #include "error.hpp"
 
-// #@@range_begin(frame_id)
 namespace {
   constexpr unsigned long long operator""_KiB(unsigned long long kib) {
     return kib * 1024;
@@ -58,8 +57,10 @@ class BitmapMemoryManager {
   static const auto kFrameCount{kMaxPhysicalMemoryBytes / kBytesPerFrame};
 
   /** @brief ビットマップ配列の要素型 */
+  // MEMO: これは適当?
   using MapLineType = unsigned long;
   /** @brief ビットマップ配列の 1 つの要素のビット数 == フレーム数 */
+  // MEMO; 1つの配列要素で64個のframeのbitを管理する.
   static const size_t kBitsPerMapLine{8 * sizeof(MapLineType)};
 
   /** @brief インスタンスを初期化する． */
@@ -88,4 +89,3 @@ class BitmapMemoryManager {
   bool GetBit(FrameID frame) const;
   void SetBit(FrameID frame, bool allocated);
 };
-// #@@range_end(bitmap_memory_manager)

@@ -166,18 +166,24 @@ extern "C" void KernelMainNewStack(
 
   SetupIdentityPageTable();
 
+  // TODO: ::記号
   ::memory_manager = new(memory_manager_buf) BitmapMemoryManager;
 
-  // MEMO: efi memory discriptor毎のloop
   const auto memory_map_base = reinterpret_cast<uintptr_t>(memory_map.buffer);
 
   // ????
   uintptr_t available_end = 0;
   // MEMO: 各memory descriptor毎にscanしてる
+  //       各EFI_MEMORY_DESCRIPTORを順にscanしていき、descの属性を確認しつつ
+  //       available_endをどんどん拡張していきながら、使用領域に対してはMarkAllocated()
+  //       によってBitMapを立てる
   for (uintptr_t iter = memory_map_base;
+       // MEMO: 全てのEFI_MEMORY_DESCRIPTORを(1 desc毎に)scanするようなloop
        iter < memory_map_base + memory_map.map_size;
        iter += memory_map.descriptor_size) {
     auto desc = reinterpret_cast<const MemoryDescriptor*>(iter);
+    // TODO: これがtrueになるcaseがよくわからない。急に飛んだaddrをさすdescが
+    // 存在しうるってこと?(-> 本によると、mem mapが歯抜けになってる部分は使用中ということらしい)
     if (available_end < desc->physical_start) {
       memory_manager->MarkAllocated(
           FrameID{available_end / kBytesPerFrame},
@@ -189,11 +195,14 @@ extern "C" void KernelMainNewStack(
     if (IsAvailable(static_cast<MemoryType>(desc->type))) {
       available_end = physical_end;
     } else {
+      // 使用済みだったらallocate markをつける
       memory_manager->MarkAllocated(
           FrameID{desc->physical_start / kBytesPerFrame},
           desc->number_of_pages * kUEFIPageSize / kBytesPerFrame);
     }
   }
+  // TODO: これを設定しないとどうなる?
+  // 追記: memorymapの実装を見れば分かった.
   memory_manager->SetMemoryRange(FrameID{1}, FrameID{available_end / kBytesPerFrame});
   printk("SetMemoryRange Done!!\n");
 

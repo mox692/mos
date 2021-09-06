@@ -2,8 +2,9 @@
 
 #include <stdint.h>
 
-// 構造体定義はUEFI specificな部分.
+// 構造体定義はUEFI specificな部分. UEFI規格で定められてる定義を独自に構造体定義とした.
 // ref: edk2/MdePkg/Include/Uefi/UefiSpec.h
+// ref: p57
 struct MemoryMap {
   unsigned long long buffer_size;
   // 内部的にはEFI_MEMORY_DESCRIPTORの配列になっている(ref:edk2/MdePkg/Include/Uefi/UefiSpec.h)
@@ -17,6 +18,7 @@ struct MemoryMap {
   uint32_t descriptor_version;
 };
 
+// MEMO: EFI_MEMORY_DESCRIPTORの定義を独自構造体として再定義したもの
 struct MemoryDescriptor {
   uint32_t type;
   uintptr_t physical_start;
