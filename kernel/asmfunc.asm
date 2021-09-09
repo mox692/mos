@@ -41,7 +41,8 @@ LoadIDT:
     pop rbp
     ret
 
-; 
+; MEMO: メインメモリ上のGDTのアドレスと、GDTの大きさを
+;       lgdt命令でcpuに登録する. (ref: p192)
 global LoadGDT  ; void LoadGDT(uint16_t limit, uint64_t offset);
 LoadGDT:
     push rbp
@@ -77,16 +78,12 @@ SetDSAll:
     mov fs, di
     mov gs, di
     ret
-; #@@range_end(set_dsall)
 
-; #@@range_begin(set_cr3)
 global SetCR3  ; void SetCR3(uint64_t value);
 SetCR3:
     mov cr3, rdi
     ret
-; #@@range_end(set_cr3)
 
-; #@@range_begin(set_main_stack)
 extern kernel_main_stack
 extern KernelMainNewStack
 

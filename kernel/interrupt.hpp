@@ -49,6 +49,7 @@ constexpr InterruptDescriptorAttribute MakeIDTAttr(
   attr.bits.type = type;
   attr.bits.descriptor_privilege_level = descriptor_privilege_level;
   attr.bits.present = present;
+  // MEMO: 値を返してる事に注意!(ダングリングpointerにはならない)
   return attr;
 }
 
@@ -64,9 +65,7 @@ class InterruptVector {
     kXHCI = 0x40,
   };
 };
-// #@@range_end(vector_numbers)
 
-// #@@range_begin(frame_struct)
 struct InterruptFrame {
   uint64_t rip;
   uint64_t cs;
@@ -74,6 +73,5 @@ struct InterruptFrame {
   uint64_t rsp;
   uint64_t ss;
 };
-// #@@range_end(frame_struct)
 
 void NotifyEndOfInterrupt();

@@ -11,6 +11,8 @@ class Console {
   Console(PixelWriter& writer,
       const PixelColor& fg_color, const PixelColor& bg_color);
   // interface
+  // 実装を省くと、具体的な実装は子クラスで定義できるので、Consoleクラスをinterfaceのように
+  // 扱うことができる.
   void PutString(const char* s);
 
  private:

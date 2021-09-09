@@ -2,13 +2,13 @@
 
 #include "asmfunc.h"
 
-// #@@range_begin(gdt_definition)
+// grobalなdesc table.
 namespace {
   std::array<SegmentDescriptor, 3> gdt;
 }
-// #@@range_end(gdt_definition)
 
-// #@@range_begin(setup_segm_function)
+// GDTの要素(セグメントdesc)に対する操作
+// コード領域としてのsegmentにしたてるための設定を行う.
 void SetCodeSegment(SegmentDescriptor& desc,
                     DescriptorType type,
                     unsigned int descriptor_privilege_level,
@@ -55,4 +55,3 @@ void SetupSegments() {
   // これを実行した瞬間にgdtがBIOS由来のものからOSのものに変更される.
   LoadGDT(sizeof(gdt) - 1, reinterpret_cast<uintptr_t>(&gdt[0]));
 }
-// #@@range_end(setup_segm_function)

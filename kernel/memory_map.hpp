@@ -7,9 +7,10 @@
 // ref: p57
 struct MemoryMap {
   unsigned long long buffer_size;
+  // memory mapの中身の先頭アドレス.
   // 内部的にはEFI_MEMORY_DESCRIPTORの配列になっている(ref:edk2/MdePkg/Include/Uefi/UefiSpec.h)
   void* buffer;
-  // MemoryMap全体のsizeを表す(EFI_MEMORY_DESCRIPTORのサイズではない!)
+  // MemoryMap全体のsizeを表す(EFI_MEMORY_DESCRIPTORエントリのサイズではない!)
   unsigned long long map_size;
   unsigned long long map_key;
   // EFI_MEMORY_DESCRIPTORのサイズ.(UEFIがupdateされるにつれ、ここが変動しうる)

@@ -5,10 +5,13 @@
 
 #include "error.hpp"
 
-// #@@range_begin(class)
+// MEMO: Queueの実装.
+// 
 template <typename T>
 class ArrayQueue {
  public:
+  // https://docs.microsoft.com/ja-jp/cpp/cpp/templates-cpp?view=msvc-160#non-type-parameters
+  // 非型paramsって言うらしい.
   template <size_t N>
   ArrayQueue(std::array<T, N>& buf);
   ArrayQueue(T* buf, size_t size);
@@ -39,9 +42,7 @@ template <typename T>
 ArrayQueue<T>::ArrayQueue(T* buf, size_t size)
   : data_{buf}, read_pos_{0}, write_pos_{0}, count_{0}, capacity_{size}
 {}
-// #@@range_end(constructor)
 
-// #@@range_begin(push)
 template <typename T>
 Error ArrayQueue<T>::Push(const T& value) {
   if (count_ == capacity_) {
@@ -56,9 +57,7 @@ Error ArrayQueue<T>::Push(const T& value) {
   }
   return MAKE_ERROR(Error::kSuccess);
 }
-// #@@range_end(push)
 
-// #@@range_begin(pop)
 template <typename T>
 Error ArrayQueue<T>::Pop() {
   if (count_ == 0) {
@@ -72,7 +71,6 @@ Error ArrayQueue<T>::Pop() {
   }
   return MAKE_ERROR(Error::kSuccess);
 }
-// #@@range_end(pop)
 
 template <typename T>
 size_t ArrayQueue<T>::Count() const {
@@ -84,9 +82,7 @@ size_t ArrayQueue<T>::Capacity() const {
   return capacity_;
 }
 
-// #@@range_begin(front)
 template <typename T>
 const T& ArrayQueue<T>::Front() const {
   return data_[read_pos_];
 }
-// #@@range_end(front)

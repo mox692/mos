@@ -5,6 +5,9 @@
 
 #include "console.hpp"
 
+// 無名namespace: https://marycore.jp/prog/cpp/unnamed-namespace/
+// 他のファイルから値を参照することができなくなる.
+// staticとの違いは？？
 namespace {
   LogLevel log_level = kWarn;
 }

@@ -167,11 +167,12 @@ extern "C" void KernelMainNewStack(
   SetupIdentityPageTable();
 
   // TODO: ::記号
+  // https://www.ibm.com/docs/ja/i/7.3?topic=expressions-scope-resolution-operator-c-only
+  // これはあくまでglobal変数のmemory_managerを使用している.
   ::memory_manager = new(memory_manager_buf) BitmapMemoryManager;
 
   const auto memory_map_base = reinterpret_cast<uintptr_t>(memory_map.buffer);
 
-  // ????
   uintptr_t available_end = 0;
   // MEMO: 各memory descriptor毎にscanしてる
   //       各EFI_MEMORY_DESCRIPTORを順にscanしていき、descの属性を確認しつつ
@@ -258,6 +259,7 @@ extern "C" void KernelMainNewStack(
   */
   const uint16_t cs = GetCS();
   // MEMO: IDTにXHCIのエントリを追加
+  // 現段階では高々このIDのエントリしかCPUに登録しない.
   SetIDTEntry(idt[InterruptVector::kXHCI], MakeIDTAttr(DescriptorType::kInterruptGate, 0),
                   reinterpret_cast<uint64_t>(IntHandlerXHCI), kernel_cs);
   LoadIDT(sizeof(idt) - 1, reinterpret_cast<uintptr_t>(&idt[0]));
@@ -314,7 +316,6 @@ extern "C" void KernelMainNewStack(
   }
 
   while (true) {
-    // #@@range_begin(get_front_message)
     __asm__("cli");
     if (main_queue.Count() == 0) {
       __asm__("sti\n\thlt");
@@ -324,7 +325,6 @@ extern "C" void KernelMainNewStack(
     Message msg = main_queue.Front();
     main_queue.Pop();
     __asm__("sti");
-    // #@@range_end(get_front_message)
 
     switch (msg.type) {
     case Message::kInterruptXHCI:

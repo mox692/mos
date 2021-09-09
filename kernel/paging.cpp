@@ -4,7 +4,6 @@
 
 #include "asmfunc.h"
 
-// #@@range_begin(setup_page)
 namespace {
   const uint64_t kPageSize4K = 4096;
   const uint64_t kPageSize2M = 512 * kPageSize4K;
@@ -16,6 +15,7 @@ namespace {
     std::array<std::array<uint64_t, 512>, kPageDirectoryCount> page_directory;
 }
 
+// MEMO: 簡易的(3層構造?)なpagetableを設定する,CR3レジスタにrootのaddrをいれる
 void SetupIdentityPageTable() {
   // root dirの先頭要素にその1つ下のtableの先頭要素のaddrを入れている.
   // TODO: なんで先頭要素だけしか使ってない? bit和は？
@@ -33,4 +33,3 @@ void SetupIdentityPageTable() {
   // rootのtableの先頭addrをCR3にsetする
   SetCR3(reinterpret_cast<uint64_t>(&pml4_table[0]));
 }
-// #@@range_end(setup_page)

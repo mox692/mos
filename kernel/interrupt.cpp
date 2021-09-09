@@ -12,7 +12,7 @@
 // ref: 165
 std::array<InterruptDescriptor, 256> idt;
 
-// idtのメンバを受け取って、その記述子のInterruptDescriptorメンバを埋める
+// IDTのメンバを受け取って、その記述子のInterruptDescriptorメンバを埋める
 void SetIDTEntry(InterruptDescriptor& desc,
                  InterruptDescriptorAttribute attr,
                  uint64_t offset,   // ハンドラのアドレスがそのまま渡ってくる(なんでoffsetという名前にした??)
@@ -24,8 +24,8 @@ void SetIDTEntry(InterruptDescriptor& desc,
   desc.segment_selector = segment_selector;
 }
 
+// MEMO: 0xfee000b0に書き込むことでINTの終了を通知できる.
 void NotifyEndOfInterrupt() {
   volatile auto end_of_interrupt = reinterpret_cast<uint32_t*>(0xfee000b0);
   *end_of_interrupt = 0;
 }
-// #@@range_end(notify_eoi)
