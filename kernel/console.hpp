@@ -8,18 +8,19 @@ class Console {
   static const int kRows = 25, kColumns = 80;
 
   // proto宣言だけのconstructor.
-  Console(PixelWriter& writer,
-      const PixelColor& fg_color, const PixelColor& bg_color);
+  Console(const PixelColor& fg_color, const PixelColor& bg_color);
   // interface
   // 実装を省くと、具体的な実装は子クラスで定義できるので、Consoleクラスをinterfaceのように
   // 扱うことができる.
   void PutString(const char* s);
+  void SetWriter(PixelWriter* writer);
 
  private:
   // interface
   void Newline();
+  void Refresh();
 
-  PixelWriter& writer_;
+  PixelWriter* writer_;
   const PixelColor fg_color_, bg_color_;
   // MEOM: console全体の文字を記憶するbuffer.
   char buffer_[kRows][kColumns + 1];
