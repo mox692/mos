@@ -7,6 +7,7 @@
 #pragma once
 
 enum class DescriptorType {
+  // TODO: どう言う意味かを知る.
   // system segment & gate descriptor types
   kUpper8Bytes   = 0,
   kLDT           = 2,

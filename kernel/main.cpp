@@ -60,7 +60,6 @@ MouseCursor* mouse_cursor;
 void MouseObserver(int8_t displacement_x, int8_t displacement_y) {
   mouse_cursor->MoveRelative({displacement_x, displacement_y});
 }
-// #@@range_end(mouse_observer)
 
 // Ref: p154
 void SwitchEhci2Xhci(const pci::Device& xhc_dev) {
@@ -257,7 +256,6 @@ extern "C" void KernelMainNewStack(
   /* 
     割り込みの設定.
   */
-  const uint16_t cs = GetCS();
   // MEMO: IDTにXHCIのエントリを追加
   // 現段階では高々このIDのエントリしかCPUに登録しない.
   SetIDTEntry(idt[InterruptVector::kXHCI], MakeIDTAttr(DescriptorType::kInterruptGate, 0),
@@ -267,7 +265,7 @@ extern "C" void KernelMainNewStack(
   /* 
     MSI割り込みの設定.
   */
-  // 0xfee00020の31:24にLocal APCI IDがある.(ref;p170)
+  // 0xfee00020の31:24にLocal APCI ID(各CPUコアに割り当てられた固有の値)がある.(ref;p170)
   const uint8_t bsp_local_apic_id =
     *reinterpret_cast<const uint32_t*>(0xfee00020) >> 24;
   pci::ConfigureMSIFixedDestination(

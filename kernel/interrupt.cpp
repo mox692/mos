@@ -12,10 +12,12 @@
 // ref: 165
 std::array<InterruptDescriptor, 256> idt;
 
-// IDTのメンバを受け取って、その記述子のInterruptDescriptorメンバを埋める
+// IDTのメンバを受け取って、その記述子のInterruptDescriptorメンバを埋める.
 void SetIDTEntry(InterruptDescriptor& desc,
                  InterruptDescriptorAttribute attr,
-                 uint64_t offset,   // ハンドラのアドレスがそのまま渡ってくる(なんでoffsetという名前にした??)
+                 // 第一引数のdescに対応したhandlerのaddr.
+                 // ハンドラのアドレスがそのまま渡ってくる(なんでoffsetという名前にした??)
+                 uint64_t offset,
                  uint16_t segment_selector) {
   desc.attr = attr;
   desc.offset_low = offset & 0xffffu;
