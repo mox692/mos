@@ -2,29 +2,26 @@
 
 #include <algorithm>
 
-// #@@range_begin(layer_ctor)
 Layer::Layer(unsigned int id) : id_{id} {
 }
-// #@@range_end(layer_ctor)
 
-// #@@range_begin(layer_id)
 unsigned int Layer::ID() const {
   return id_;
 }
-// #@@range_end(layer_id)
 
-// #@@range_begin(layer_setget_window)
+// Laylerに、引数で受け取ったwindowを登録する.
 Layer& Layer::SetWindow(const std::shared_ptr<Window>& window) {
+  // TODO: こうやってメンバ変数にアクセスできるの？
   window_ = window;
+  // MEMO: thisはRustで言うself?(インスタンス変数自身)
   return *this;
 }
 
 std::shared_ptr<Window> Layer::GetWindow() const {
   return window_;
 }
-// #@@range_end(layer_setget_window)
 
-// #@@range_begin(layer_move)
+// MEMO: Layler.posを更新する.
 Layer& Layer::Move(Vector2D<int> pos) {
   pos_ = pos;
   return *this;
@@ -34,37 +31,33 @@ Layer& Layer::MoveRelative(Vector2D<int> pos_diff) {
   pos_ += pos_diff;
   return *this;
 }
-// #@@range_end(layer_move)
 
-// #@@range_begin(layer_drawto)
+// layerに紐づいたwindowがあるかを確認して、あればwindowクラスのDrawToに処理を以上する.
 void Layer::DrawTo(PixelWriter& writer) const {
   if (window_) {
     window_->DrawTo(writer, pos_);
   }
 }
-// #@@range_end(layer_drawto)
 
 
-// #@@range_begin(layermgr_setwriter)
 void LayerManager::SetWriter(PixelWriter* writer) {
   writer_ = writer;
 }
-// #@@range_end(layermgr_setwriter)
 
-// #@@range_begin(layermgr_newlayer)
+// 新しいLaylerを作成し、layersにappendする.
+// この際、latest_id_をincrementしてあげる.
 Layer& LayerManager::NewLayer() {
   ++latest_id_;
   return *layers_.emplace_back(new Layer{latest_id_});
 }
-// #@@range_end(layermgr_newlayer)
 
-// #@@range_begin(layermgr_draw)
+// layer_stack_に溜まっているlayerを全て描画する
 void LayerManager::Draw() const {
+  // TODO: こう言う書き方.
   for (auto layer : layer_stack_) {
     layer->DrawTo(*writer_);
   }
 }
-// #@@range_end(layermgr_draw)
 
 // #@@range_begin(layermgr_move)
 void LayerManager::Move(unsigned int id, Vector2D<int> new_position) {
@@ -74,14 +67,15 @@ void LayerManager::Move(unsigned int id, Vector2D<int> new_position) {
 void LayerManager::MoveRelative(unsigned int id, Vector2D<int> pos_diff) {
   FindLayer(id)->MoveRelative(pos_diff);
 }
-// #@@range_end(layermgr_move)
 
-// #@@range_begin(layermgr_updown)
+// 指定されたidを持つlayerを、new_heightの高さで書き換えるように、layer_stack_をいじる,
 void LayerManager::UpDown(unsigned int id, int new_height) {
   if (new_height < 0) {
     Hide(id);
     return;
   }
+
+  // new_heightは高すぎる値を入れても意味がない.
   if (new_height > layer_stack_.size()) {
     new_height = layer_stack_.size();
   }
@@ -98,12 +92,12 @@ void LayerManager::UpDown(unsigned int id, int new_height) {
   if (new_pos == layer_stack_.end()) {
     --new_pos;
   }
+  // layler_stackから古いレイヤーを削除.
   layer_stack_.erase(old_pos);
+  // 新しいlayerを挿入.
   layer_stack_.insert(new_pos, layer);
 }
-// #@@range_end(layermgr_updown)
 
-// #@@range_begin(layermgr_hide)
 void LayerManager::Hide(unsigned int id) {
   auto layer = FindLayer(id);
   auto pos = std::find(layer_stack_.begin(), layer_stack_.end(), layer);

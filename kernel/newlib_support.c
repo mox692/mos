@@ -6,6 +6,8 @@ void _exit(void) {
   while (1) __asm__("hlt");
 }
 
+// MEMO: 
+// program_break_endはInitializeHeap()によって初期化される
 caddr_t program_break, program_break_end;
 
 caddr_t sbrk(int incr) {

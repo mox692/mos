@@ -33,11 +33,13 @@ void Console::PutString(const char* s) {
   }
 }
 
+// SetWriterの具体的な実装.
 void Console::SetWriter(PixelWriter* writer) {
   if (writer == writer_) {
     return;
   }
   writer_ = writer;
+  // MEMO: ここでどうして再描画する必要あり？
   Refresh();
 }
 
@@ -62,6 +64,7 @@ void Console::Newline() {
   }
 }
 
+// buffer_に溜めている文字を、再描画.
 void Console::Refresh() {
   for (int row = 0; row < kRows; ++row) {
     WriteString(*writer_, 0, 16 * row, buffer_[row], fg_color_);

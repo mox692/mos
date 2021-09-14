@@ -19,7 +19,7 @@ class Window {
  public:
   /** @brief WindowWriter は Window と関連付けられた PixelWriter を提供する。
    */
-  // #@@range_begin(windowwriter)
+  // MEMO: PixelWriterを継承.
   class WindowWriter : public PixelWriter {
    public:
     WindowWriter(Window& window) : window_{window} {}

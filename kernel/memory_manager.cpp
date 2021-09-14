@@ -73,7 +73,11 @@ void BitmapMemoryManager::SetBit(FrameID frame, bool allocated) {
 
 extern "C" caddr_t program_break, program_break_end;
 
+// Memory managerから適当な数のframeを取ってきて、それをkernelのheap領域とする.
+// heap領域を表すprogram_break_end, program_breakなどは
+// kernel/memory_manager.cppで定義してる.
 Error InitializeHeap(BitmapMemoryManager& memory_manager) {
+  // MEMO: ここの数は割と適当
   const int kHeapFrames = 64 * 512;
   const auto heap_start = memory_manager.Allocate(kHeapFrames);
   if (heap_start.error) {

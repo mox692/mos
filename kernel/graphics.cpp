@@ -40,6 +40,8 @@ void FillRectangle(PixelWriter& writer, const Vector2D<int>& pos,
   }
 }
 
+// PixelWriterを受け取り、それっぽいデスクトップを描画する.
+// 中身は割と自由でいい気がする.
 void DrawDesktop(PixelWriter& writer) {
   const auto width = writer.Width();
   const auto height = writer.Height();

@@ -56,7 +56,8 @@ BitmapMemoryManager* memory_manager;
 // TODO:
 unsigned int mouse_layer_id;
 
-// MEMO: マウスに問い合わせた際に実行される処理
+// MEMO: マウスに問い合わせた際に実行される処理.
+// 9章の修正により、layerを考慮した描画が可能になっている.
 void MouseObserver(int8_t displacement_x, int8_t displacement_y) {
   layer_manager->MoveRelative(mouse_layer_id, {displacement_x, displacement_y});
   layer_manager->Draw();
@@ -126,7 +127,7 @@ extern "C" void KernelMainNewStack(
   }
 
   /* 
-    desctopの描画.
+    desctopの描画.(いらない説ある.)
   */
   DrawDesktop(*pixel_writer);
 
@@ -189,29 +190,31 @@ extern "C" void KernelMainNewStack(
           desc->number_of_pages * kUEFIPageSize / kBytesPerFrame);
     }
   }
+
   // TODO: これを設定しないとどうなる?
   // 追記: memorymapの実装を見れば分かった.
   memory_manager->SetMemoryRange(FrameID{1}, FrameID{available_end / kBytesPerFrame});
   printk("SetMemoryRange Done!!\n");
 
   /* 
-    マウス・デバイスの設定
+    Heapの設定.
   */
-  // この段階でcursorが出現する(?)
-
   if (auto err = InitializeHeap(*memory_manager)) {
     Log(kError, "failed to allocate pages: %s at %s:%d\n",
         err.Name(), err.File(), err.Line());
     exit(1);
   }
 
+  // 割り込みで使用するMesage Queueを設定
   std::array<Message, 32> main_queue_data;
   ArrayQueue<Message> main_queue{main_queue_data};
   ::main_queue = &main_queue;
 
+  /* 
+    マウス・デバイスの設定
+  */
   // Deviceをscanしていく
   auto err = pci::ScanAllBus();
-
   Log(kDebug, "ScanAllBus: %s\n", err.Name());
 
   // scanされたDeviceを一覧表示
@@ -291,6 +294,7 @@ extern "C" void KernelMainNewStack(
 
   usb::HIDMouseDriver::default_observer = MouseObserver;
 
+  // TODO:
   for (int i = 1; i <= xhc.MaxPorts(); ++i) {
     auto port = xhc.PortAt(i);
     Log(kDebug, "Port %d: IsConnected=%d\n", i, port.IsConnected());
@@ -304,9 +308,16 @@ extern "C" void KernelMainNewStack(
     }
   }
 
+  /* 
+    windowの設定.
+    各層毎に別々のwindow instanceを作成することで、重ね合わせを実現する.
+  */
   const int kFrameWidth = frame_buffer_config.horizontal_resolution;
   const int kFrameHeight = frame_buffer_config.vertical_resolution;
 
+  // make_shared: https://cpprefjp.github.io/reference/memory/make_shared.html 
+  // TODO: なぜmake_sharedを使用してる
+  // この場合kFrameWidth, kFrameHeightで初期化されたinstanceを生成.
   auto bgwindow = std::make_shared<Window>(kFrameWidth, kFrameHeight);
   auto bgwriter = bgwindow->Writer();
 
@@ -316,8 +327,10 @@ extern "C" void KernelMainNewStack(
   auto mouse_window = std::make_shared<Window>(
       kMouseCursorWidth, kMouseCursorHeight);
   mouse_window->SetTransparentColor(kMouseTransparentColor);
+  // mouse_windowのWriterを渡していることに注意!
   DrawMouseCursor(mouse_window->Writer(), {0, 0});
 
+  // LayerManagerの作成
   layer_manager = new LayerManager;
   layer_manager->SetWriter(pixel_writer);
 
