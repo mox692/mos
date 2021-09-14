@@ -24,6 +24,7 @@
 #include "memory_manager.hpp"
 #include "window.hpp"
 #include "layer.hpp"
+#include "timer.hpp"
 
 // TODO: 調べる
 // void* operator new(size_t size, void* buf) {
@@ -60,7 +61,11 @@ unsigned int mouse_layer_id;
 // 9章の修正により、layerを考慮した描画が可能になっている.
 void MouseObserver(int8_t displacement_x, int8_t displacement_y) {
   layer_manager->MoveRelative(mouse_layer_id, {displacement_x, displacement_y});
+  StartLAPICTimer();
   layer_manager->Draw();
+  auto elapsed = LAPICTimerElapsed();
+  StopLAPICTimer();
+  printk("MouseObserver: elapsed = %u\n", elapsed);
 }
 
 // Ref: p154
@@ -138,8 +143,11 @@ extern "C" void KernelMainNewStack(
     kDesktopFGColor, kDesktopBGColor
   };
   console->SetWriter(pixel_writer);
-  printk("Welcome to MikanOS!\n");
+  printk("Welcome to MOS!\n");
   SetLogLevel(kWarn);
+  
+  // Timer初期化.
+  InitializeLAPICTimer();
 
   /* 
     memory mapの設定
