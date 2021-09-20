@@ -33,15 +33,16 @@ Layer& Layer::MoveRelative(Vector2D<int> pos_diff) {
 }
 
 // layerに紐づいたwindowがあるかを確認して、あればwindowクラスのDrawToに処理を以上する.
-void Layer::DrawTo(PixelWriter& writer) const {
+// MEMO: この実装から、layerに直接writeすることはできないことがわかる.
+void Layer::DrawTo(FrameBuffer& screen) const {
   if (window_) {
-    window_->DrawTo(writer, pos_);
+    window_->DrawTo(screen, pos_);
   }
 }
 
 
-void LayerManager::SetWriter(PixelWriter* writer) {
-  writer_ = writer;
+void LayerManager::SetWriter(FrameBuffer* screen) {
+  screen_ = screen;
 }
 
 // 新しいLaylerを作成し、layersにappendする.
@@ -51,11 +52,12 @@ Layer& LayerManager::NewLayer() {
   return *layers_.emplace_back(new Layer{latest_id_});
 }
 
-// layer_stack_に溜まっているlayerを全て描画する
+// MEMO: layer_stack_に溜まっているlayerを全て描画する.
+// 実際の処理はLayer classのDrawToに委譲する.
 void LayerManager::Draw() const {
   // TODO: こう言う書き方.
   for (auto layer : layer_stack_) {
-    layer->DrawTo(*writer_);
+    layer->DrawTo(*screen_);
   }
 }
 

@@ -119,6 +119,8 @@ extern "C" void KernelMainNewStack(
   /* 
     画面描画の設定 
   */
+
+  // (pixel_format毎の)pixel_writerを取得する.
   switch (frame_buffer_config.pixel_format) {
     case kPixelRGBResv8BitPerColor:
       // MEMO: 配置newでインスタンスのためのmemoryを確保.
@@ -319,28 +321,48 @@ extern "C" void KernelMainNewStack(
   /* 
     windowの設定.
     各層毎に別々のwindow instanceを作成することで、重ね合わせを実現する.
+    下の層を先に描画していく.
   */
   const int kFrameWidth = frame_buffer_config.horizontal_resolution;
   const int kFrameHeight = frame_buffer_config.vertical_resolution;
 
+
+  /* 
+    background windowの設定.
+  */
   // make_shared: https://cpprefjp.github.io/reference/memory/make_shared.html 
   // TODO: なぜmake_sharedを使用してる
   // この場合kFrameWidth, kFrameHeightで初期化されたinstanceを生成.
-  auto bgwindow = std::make_shared<Window>(kFrameWidth, kFrameHeight);
+  auto bgwindow = std::make_shared<Window>(
+      kFrameWidth, kFrameHeight, frame_buffer_config.pixel_format);
   auto bgwriter = bgwindow->Writer();
 
+  // MEMO: desktopを描画
   DrawDesktop(*bgwriter);
+  // MEMO: Consoleにwriterを登録
   console->SetWriter(bgwriter);
 
+  /* 
+    mouse windowの設定.
+  */
   auto mouse_window = std::make_shared<Window>(
-      kMouseCursorWidth, kMouseCursorHeight);
+          kMouseCursorWidth, kMouseCursorHeight, frame_buffer_config.pixel_format);
   mouse_window->SetTransparentColor(kMouseTransparentColor);
   // mouse_windowのWriterを渡していることに注意!
   DrawMouseCursor(mouse_window->Writer(), {0, 0});
 
-  // LayerManagerの作成
+  // TODO: struct and Initialize read
+  FrameBuffer screen;
+  if (auto err = screen.Initialize(frame_buffer_config)) {
+    Log(kError, "failed to initialize frame buffer: %s at %s:%d\n",
+        err.Name(), err.File(), err.Line());
+  }
+
+  /* 
+    Layerの設定.
+  */
   layer_manager = new LayerManager;
-  layer_manager->SetWriter(pixel_writer);
+  layer_manager->SetWriter(&screen);
 
   auto bglayer_id = layer_manager->NewLayer()
     .SetWindow(bgwindow)
@@ -351,6 +373,7 @@ extern "C" void KernelMainNewStack(
     .Move({200, 200})
     .ID();
 
+  // 初期描画.
   layer_manager->UpDown(bglayer_id, 0);
   layer_manager->UpDown(mouse_layer_id, 1);
   layer_manager->Draw();
@@ -368,6 +391,7 @@ extern "C" void KernelMainNewStack(
 
     switch (msg.type) {
     case Message::kInterruptXHCI:
+      // TODO: 実際のxhcの割り込み処理
       while (xhc.PrimaryEventRing()->HasFront()) {
         if (auto err = ProcessEvent(xhc)) {
           Log(kError, "Error while ProcessEvent: %s at %s:%d\n",

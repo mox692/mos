@@ -310,6 +310,7 @@ EFI_STATUS EFIAPI UefiMain(
   UINT64 entry_addr = *(UINT64*)(kernel_first_addr + 24);
 
   // frame bufferのconfigを作成
+  // ref; frame bufferとは p82
   struct FrameBufferConfig config = {
     (UINT8*)gop->Mode->FrameBufferBase,
     gop->Mode->Info->PixelsPerScanLine,
