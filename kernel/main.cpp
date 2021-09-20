@@ -347,7 +347,7 @@ extern "C" void KernelMainNewStack(
   // MEMO: desktopを描画
   DrawDesktop(*bgwriter);
   // MEMO: Consoleにwriterを登録
-  console->SetWriter(bgwriter);
+  console->SetWindow(bgwindow);
 
   /* 
     mouse windowの設定.

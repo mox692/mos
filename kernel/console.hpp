@@ -1,6 +1,8 @@
 #pragma once
 
+#include <memory>
 #include "graphics.hpp"
+#include "window.hpp"
 
 class Console {
  public:
@@ -14,6 +16,7 @@ class Console {
   // 扱うことができる.
   void PutString(const char* s);
   void SetWriter(PixelWriter* writer);
+  void SetWindow(const std::shared_ptr<Window>& window);
 
  private:
   // interface
@@ -21,6 +24,7 @@ class Console {
   void Refresh();
 
   PixelWriter* writer_;
+  std::shared_ptr<Window> window_;
   const PixelColor fg_color_, bg_color_;
   // MEOM: console全体の文字を記憶するbuffer.
   char buffer_[kRows][kColumns + 1];
