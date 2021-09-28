@@ -352,6 +352,10 @@ extern "C" void KernelMainNewStack(
   DrawMouseCursor(mouse_window->Writer(), {0, 0});
   mouse_position = {200, 200};
 
+  auto main_window = std::make_shared<Window>(
+      160, 52, frame_buffer_config.pixel_format);
+  DrawWindow(*main_window->Writer(), "Hello Window");
+  
   // TODO: struct and Initialize read
   FrameBuffer screen;
   if (auto err = screen.Initialize(frame_buffer_config)) {
@@ -373,15 +377,31 @@ extern "C" void KernelMainNewStack(
     .SetWindow(mouse_window)
     .Move(mouse_position)
     .ID();
+
+  auto main_window_layer_id = layer_manager->NewLayer()
+    .SetWindow(main_window)
+    .Move({300, 100})
+    .ID();
+
   // 初期描画.
   layer_manager->UpDown(bglayer_id, 0);
   layer_manager->UpDown(mouse_layer_id, 1);
+  layer_manager->UpDown(main_window_layer_id, 1);
   layer_manager->Draw();
 
+  char str[128];
+  unsigned int count = 0;
+
   while (true) {
+    ++count;
+    sprintf(str, "%010u", count);
+    FillRectangle(*main_window->Writer(), {24, 28}, {8 * 10, 16}, {0xc6, 0xc6, 0xc6});
+    WriteString(*main_window->Writer(), {24, 28}, str, {0, 0, 0});
+    layer_manager->Draw();
+
     __asm__("cli");
     if (main_queue.Count() == 0) {
-      __asm__("sti\n\thlt");
+      __asm__("sti");
       continue;
     }
 
