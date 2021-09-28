@@ -62,7 +62,7 @@ Vector2D<int> mouse_position;
 
 // MEMO: マウスに問い合わせた際に実行される処理.
 // 9章の修正により、layerを考慮した描画が可能になっている.
-void MouseObserver(int8_t displacement_x, int8_t displacement_y) {
+void MouseObserver(uint8_t buttons, int8_t displacement_x, int8_t displacement_y) {
   static unsigned int mouse_drag_layer_id = 0;
   static uint8_t previous_buttons = 0;
 
