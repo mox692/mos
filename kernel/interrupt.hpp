@@ -8,8 +8,10 @@
 
 #include <array>
 #include <cstdint>
+#include <deque>
 
 #include "x86_descriptor.hpp"
+#include "message.hpp"
 
 // 割り込み記述子の属性を表現.
 // bit fieldを用いているので、全体のsizeとしては16bit.
@@ -75,3 +77,5 @@ struct InterruptFrame {
 };
 
 void NotifyEndOfInterrupt();
+
+void InitializeInterrupt(std::deque<Message>* msg_queue);

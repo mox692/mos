@@ -11,7 +11,6 @@
 
 #include "x86_descriptor.hpp"
 
-// Segment Descの定義(bit fieldを用いて8byteの構造になっている.)
 union SegmentDescriptor {
   uint64_t data;
   struct {
@@ -42,4 +41,9 @@ void SetDataSegment(SegmentDescriptor& desc,
                     uint32_t base,
                     uint32_t limit);
 
+const uint16_t kKernelCS = 1 << 3;
+const uint16_t kKernelSS = 2 << 3;
+const uint16_t kKernelDS = 0;
+
 void SetupSegments();
+void InitializeSegmentation();

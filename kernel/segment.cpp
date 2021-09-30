@@ -55,3 +55,10 @@ void SetupSegments() {
   // これを実行した瞬間にgdtがBIOS由来のものからOSのものに変更される.
   LoadGDT(sizeof(gdt) - 1, reinterpret_cast<uintptr_t>(&gdt[0]));
 }
+
+void InitializeSegmentation() {
+  SetupSegments();
+
+  SetDSAll(kKernelDS);
+  SetCSSS(kKernelCS, kKernelSS);
+}

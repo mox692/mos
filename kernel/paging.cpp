@@ -33,3 +33,7 @@ void SetupIdentityPageTable() {
   // rootのtableの先頭addrをCR3にsetする
   SetCR3(reinterpret_cast<uint64_t>(&pml4_table[0]));
 }
+
+void InitializePaging() {
+  SetupIdentityPageTable();
+}
