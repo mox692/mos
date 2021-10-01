@@ -100,5 +100,6 @@ void InitializeConsole() {
   console = new(console_buf) Console{
     kDesktopFGColor, kDesktopBGColor
   };
+  // TODO: screen_writerこれどこからきた？？
   console->SetWriter(screen_writer);
 }

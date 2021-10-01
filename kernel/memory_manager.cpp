@@ -107,6 +107,9 @@ namespace {
   }
 }
 
+// Using memory_map info passed by UEFI, 
+// initialize memory manager instance,
+// and call InitializeHeap().
 void InitializeMemoryManager(const MemoryMap& memory_map) {
   ::memory_manager = new(memory_manager_buf) BitmapMemoryManager;
 
@@ -115,6 +118,7 @@ void InitializeMemoryManager(const MemoryMap& memory_map) {
   for (uintptr_t iter = memory_map_base;
        iter < memory_map_base + memory_map.map_size;
        iter += memory_map.descriptor_size) {
+    // MEMO: Each memory map discriptor.
     auto desc = reinterpret_cast<const MemoryDescriptor*>(iter);
     if (available_end < desc->physical_start) {
       memory_manager->MarkAllocated(
@@ -140,4 +144,3 @@ void InitializeMemoryManager(const MemoryMap& memory_map) {
     exit(1);
   }
 }
-

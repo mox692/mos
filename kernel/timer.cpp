@@ -1,6 +1,9 @@
 #include "timer.hpp"
 
+#include "interrupt.hpp"
+
 namespace {
+  // TODO: 右辺のアドレスの変数を生成してるんだろうが、いまいちしっくりこない.
   const uint32_t kCountMax = 0xffffffffu;
   volatile uint32_t& lvt_timer = *reinterpret_cast<uint32_t*>(0xfee00320);
   volatile uint32_t& initial_count = *reinterpret_cast<uint32_t*>(0xfee00380);
@@ -8,9 +11,11 @@ namespace {
   volatile uint32_t& divide_config = *reinterpret_cast<uint32_t*>(0xfee003e0);
 }
 
+// MEMO: LAPICTimer関連のレジスタに直接書き込むことで、timerを制御している.
 void InitializeLAPICTimer() {
   divide_config = 0b1011; // divide 1:1
-  lvt_timer = (0b001 << 16) | 32; // masked, one-shot
+  lvt_timer = (0b010 << 16) | InterruptVector::kLAPICTimer; // not-masked, periodic
+  initial_count = kCountMax;
 }
 
 void StartLAPICTimer() {

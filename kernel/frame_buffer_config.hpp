@@ -7,6 +7,7 @@ enum PixelFormat {
   kPixelBGRResv8BitPerColor,
 };
 
+// frame buffer(memoryと画面のpixelを対応づけたdata構造)の設定.
 struct FrameBufferConfig {
   /// Base address of graphics linear frame buffer.
   /// Offset zero in FrameBufferBase represents the upper left pixel of the display.

@@ -73,10 +73,14 @@ Vector2D<int> ScreenSize() {
   };
 }
 
+// MEMO: char arrayとして領域確保.
 namespace {
   char pixel_writer_buf[sizeof(RGBResv8BitPerColorPixelWriter)];
 }
 
+// Read framebufferconfig, passed by UEFI,
+// and configure screen configuration.
+// After that, draw desctop by pixelwriter.
 void InitializeGraphics(const FrameBufferConfig& screen_config) {
   ::screen_config = screen_config;
 
