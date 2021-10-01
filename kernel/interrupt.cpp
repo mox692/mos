@@ -8,6 +8,7 @@
 
 #include "asmfunc.h"
 #include "segment.hpp"
+#include "timer.hpp"
 
 // Interrupt Discriptor Table.
 // 全部で256種のInterrupt Discriptor(割り込み要因と、それに対するハンドラを記述した記述子)
@@ -46,7 +47,7 @@ namespace {
 
   __attribute__((interrupt))
   void IntHandlerLAPICTimer(InterruptFrame* frame) {
-    msg_queue->push_back(Message{Message::kInterruptLAPICTimer});
+    LAPICTimerOnInterrupt();
     NotifyEndOfInterrupt();
   }
 }
