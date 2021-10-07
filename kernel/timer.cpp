@@ -4,6 +4,7 @@
 
 namespace {
   // TODO: 右辺のアドレスの変数を生成してるんだろうが、いまいちしっくりこない.
+
   const uint32_t kCountMax = 0xffffffffu;
   volatile uint32_t& lvt_timer = *reinterpret_cast<uint32_t*>(0xfee00320);
   volatile uint32_t& initial_count = *reinterpret_cast<uint32_t*>(0xfee00380);
@@ -14,7 +15,7 @@ namespace {
 // MEMO: LAPICTimer関連のレジスタに直接書き込むことで、timerを制御している.
 void InitializeLAPICTimer(std::deque<Message>& msg_queue) {
   timer_manager = new TimerManager{msg_queue};
-
+  // ref:p271.
   divide_config = 0b1011; // divide 1:1
   lvt_timer = (0b010 << 16) | InterruptVector::kLAPICTimer; // not-masked, periodic
   initial_count = 0x1000000u;
@@ -36,7 +37,6 @@ Timer::Timer(unsigned long timeout, int value)
     : timeout_{timeout}, value_{value} {
 }
 
-// #@@range_begin(timermgr_addtimer)
 TimerManager::TimerManager(std::deque<Message>& msg_queue)
     : msg_queue_{msg_queue} {
   timers_.push(Timer{std::numeric_limits<unsigned long>::max(), -1});

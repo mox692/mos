@@ -101,7 +101,6 @@ extern "C" void KernelMainNewStack(
   char str[128];
 
   while (true) {
-    // #@@range_begin(show_tick)
     __asm__("cli");
     const auto tick = timer_manager->CurrentTick();
     __asm__("sti");
@@ -116,7 +115,6 @@ extern "C" void KernelMainNewStack(
       __asm__("sti\n\thlt");
       continue;
     }
-    // #@@range_end(show_tick)
 
     Message msg = main_queue->front();
     main_queue->pop_front();
@@ -134,7 +132,6 @@ extern "C" void KernelMainNewStack(
             msg.arg.timer.timeout + 100, msg.arg.timer.value + 1));
       }
       break;
-    // #@@range_end(timer_event)
     default:
       Log(kError, "Unknown message type: %d\n", msg.type);
     }
