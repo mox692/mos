@@ -5,6 +5,11 @@
 次回
 * screen軽く確認したら、本読みながら9cを追っていく.終わったら次へ.
 
+10/14
+* APICやACPIについて調べてた.
+  * 大神さんの神ブログも見つけたので、今後取り組みたい.
+  * かなりハードに近い部分なので、根気がいる
+  * 自作本を読むときも、どこまでがハード由来でどこまでがc++による実現かの区別をつけると良さそう.
 
 
 ### C++ specific syntax.
@@ -50,3 +55,16 @@ class Cat : Animal{
     * PITと比較した際の特徴は
       * PCに直接回路が埋め込まれているので、すぐに使用できる.
       * 周波数がマシンによって一定出ない.ので、secondなどに変換する際は別途変換pathを噛ませる必要がある.
+* APIC
+  * https://wiki.osdev.org/APIC
+    * advancedなPIC.
+* PIC
+  * [8259 PIC](https://wiki.osdev.org/PIC)
+    * hardwareは発生させた割り込みを適切にカーネルに通知する部分を担当する.
+* EFI system table
+  * 参考
+    * https://edk2-docs.gitbook.io/edk-ii-uefi-driver-writer-s-guide/3_foundation/33_uefi_system_table
+    * https://sites.google.com/site/uefiforth/bios/uefi/uefi/4-efi-system-table/4-3-efi-system-**table** 
+* ACPI
+  * [ACPI](https://ja.wikipedia.org/wiki/Advanced_Configuration_and_Power_Interface)
+  * [わかりそうで](https://wa3.i-3-i.info/word14319.html)
