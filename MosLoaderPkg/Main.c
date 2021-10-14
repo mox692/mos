@@ -332,6 +332,7 @@ EFI_STATUS EFIAPI UefiMain(
 
   VOID* acpi_table = NULL;
   for (UINTN i = 0; i < system_table->NumberOfTableEntries; ++i) {
+    // MEMO: system tableにgEfiAcpiTableGuid(acpiのconfig)が含まれているかを調べる.
     if (CompareGuid(&gEfiAcpiTableGuid,
                     &system_table->ConfigurationTable[i].VendorGuid)) {
       acpi_table = system_table->ConfigurationTable[i].VendorTable;

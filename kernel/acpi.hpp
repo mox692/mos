@@ -10,6 +10,7 @@
 
 namespace acpi {
 
+
 struct RSDP {
   char signature[8];
   uint8_t checksum;

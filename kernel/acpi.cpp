@@ -36,6 +36,7 @@ bool RSDP::IsValid() const {
     Log(kDebug, "ACPI revision must be 2: %d\n", this->revision);
     return false;
   }
+  // TODO: RSDPは、先頭から20byteまでのbitの和の合計が0になることが確定している？？
   if (auto sum = SumBytes(this, 20); sum != 0) {
     Log(kDebug, "sum of 20 bytes must be 0: %d\n", sum);
     return false;
