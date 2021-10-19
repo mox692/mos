@@ -1,6 +1,5 @@
 #pragma once
 
-// for MSI.
 struct Message {
   enum Type {
     kInterruptXHCI,
@@ -13,10 +12,11 @@ struct Message {
       unsigned long timeout;
       int value;
     } timer;
+
     struct {
+      uint8_t modifier;
       uint8_t keycode;
       char ascii;
     } keyboard;
   } arg;
-
 };
