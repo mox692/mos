@@ -46,9 +46,7 @@ struct XSDT {
   const DescriptionHeader& operator[](size_t i) const;
   size_t Count() const;
 } __attribute__((packed));
-// #@@range_end(xsdt)
 
-// #@@range_begin(fadt)
 struct FADT {
   DescriptionHeader header;
 
@@ -60,7 +58,9 @@ struct FADT {
 } __attribute__((packed));
 
 extern const FADT* fadt;
+const int kPMTimerFreq = 3579545;
 
+void WaitMilliseconds(unsigned long msec);
 void Initialize(const RSDP& rsdp);
 
 } // namespace acpi

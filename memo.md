@@ -11,6 +11,8 @@
   * かなりハードに近い部分なので、根気がいる
   * 自作本を読むときも、どこまでがハード由来でどこまでがc++による実現かの区別をつけると良さそう.
 
+10/19
+* FADTとかは、まじでソフトからhardを触っている感覚になるな:/
 
 ### C++ specific syntax.
 * scope resolution operator.
@@ -70,3 +72,5 @@ class Cat : Animal{
   * [わかりそうで](https://wa3.i-3-i.info/word14319.html)
 * RSDP
   * [RSDP](https://wiki.osdev.org/RSDP)
+* FADT
+  * [FADT](https://wiki.osdev.org/FADT)
