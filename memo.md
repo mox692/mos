@@ -68,3 +68,5 @@ class Cat : Animal{
 * ACPI
   * [ACPI](https://ja.wikipedia.org/wiki/Advanced_Configuration_and_Power_Interface)
   * [わかりそうで](https://wa3.i-3-i.info/word14319.html)
+* RSDP
+  * [RSDP](https://wiki.osdev.org/RSDP)
