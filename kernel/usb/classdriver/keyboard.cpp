@@ -9,7 +9,6 @@ namespace usb {
       : HIDBaseDriver{dev, interface_index, 8} {
   }
 
-  // #@@range_begin(on_data_received)
   Error HIDKeyboardDriver::OnDataReceived() {
     for (int i = 2; i < 8; ++i) {
       const uint8_t key = Buffer()[i];
