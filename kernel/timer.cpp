@@ -2,10 +2,9 @@
 
 #include "acpi.hpp"
 #include "interrupt.hpp"
+#include "task.hpp"
 
 namespace {
-  // TODO: 右辺のアドレスの変数を生成してるんだろうが、いまいちしっくりこない.
-
   const uint32_t kCountMax = 0xffffffffu;
   volatile uint32_t& lvt_timer = *reinterpret_cast<uint32_t*>(0xfee00320);
   volatile uint32_t& initial_count = *reinterpret_cast<uint32_t*>(0xfee00380);
@@ -13,7 +12,6 @@ namespace {
   volatile uint32_t& divide_config = *reinterpret_cast<uint32_t*>(0xfee003e0);
 }
 
-// MEMO: LAPICTimer関連のレジスタに直接書き込むことで、timerを制御している.
 void InitializeLAPICTimer(std::deque<Message>& msg_queue) {
   timer_manager = new TimerManager{msg_queue};
 
@@ -26,7 +24,7 @@ void InitializeLAPICTimer(std::deque<Message>& msg_queue) {
   StopLAPICTimer();
 
   lapic_timer_freq = static_cast<unsigned long>(elapsed) * 10;
-  // ref:p271.
+
   divide_config = 0b1011; // divide 1:1
   lvt_timer = (0b010 << 16) | InterruptVector::kLAPICTimer; // not-masked, periodic
   initial_count = lapic_timer_freq / kTimerFreq;
@@ -57,12 +55,22 @@ void TimerManager::AddTimer(const Timer& timer) {
   timers_.push(timer);
 }
 
-void TimerManager::Tick() {
+// #@@range_begin(tick)
+bool TimerManager::Tick() {
   ++tick_;
+
+  bool task_timer_timeout = false;
   while (true) {
     const auto& t = timers_.top();
     if (t.Timeout() > tick_) {
       break;
+    }
+
+    if (t.Value() == kTaskTimerValue) {
+      task_timer_timeout = true;
+      timers_.pop();
+      timers_.push(Timer{tick_ + kTaskTimerPeriod, kTaskTimerValue});
+      continue;
     }
 
     Message m{Message::kTimerTimeout};
@@ -72,11 +80,21 @@ void TimerManager::Tick() {
 
     timers_.pop();
   }
+
+  return task_timer_timeout;
 }
+// #@@range_end(tick)
 
 TimerManager* timer_manager;
 unsigned long lapic_timer_freq;
 
+// #@@range_begin(call_switchtask)
 void LAPICTimerOnInterrupt() {
-  timer_manager->Tick();
+  const bool task_timer_timeout = timer_manager->Tick();
+  NotifyEndOfInterrupt();
+
+  if (task_timer_timeout) {
+    SwitchTask();
+  }
 }
+// #@@range_end(call_switchtask)
