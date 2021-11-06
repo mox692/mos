@@ -39,6 +39,9 @@ void NotifyEndOfInterrupt() {
 namespace {
   std::deque<Message>* msg_queue;
 
+  // MEMO: intが飛んできた際のハンドラ.
+  //       keybordみたいに、ハンドラを登録してないパターンもある
+
   __attribute__((interrupt))
   void IntHandlerXHCI(InterruptFrame* frame) {
     msg_queue->push_back(Message{Message::kInterruptXHCI});
@@ -51,6 +54,7 @@ namespace {
   }
 }
 
+// MEMO: Interrunptをhardwareに登録.
 void InitializeInterrupt(std::deque<Message>* msg_queue) {
   ::msg_queue = msg_queue;
 

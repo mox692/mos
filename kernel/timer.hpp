@@ -42,8 +42,9 @@ class TimerManager {
 
 extern TimerManager* timer_manager;
 extern unsigned long lapic_timer_freq;
+// MEMO: 100回/s
 const int kTimerFreq = 100;
-
+// MEMO: 0.02s間隔でtimer割り込みを発生させる.
 const int kTaskTimerPeriod = static_cast<int>(kTimerFreq * 0.02);
 const int kTaskTimerValue = std::numeric_limits<int>::min();
 

@@ -138,9 +138,6 @@ void TaskB(int task_id, int data) {
 
 std::deque<Message>* main_queue;
 
-//////////////////////////////////////////////////
-
-// const参照型
 alignas(16) uint8_t kernel_main_stack[1024 * 1024];
 
 extern "C" void KernelMainNewStack(
@@ -217,6 +214,7 @@ extern "C" void KernelMainNewStack(
     main_queue->pop_front();
     __asm__("sti");
 
+    // MEMO: 割り込みハンドラとは別の処理.(単なるmsgキューの処理.)
     switch (msg.type) {
     case Message::kInterruptXHCI:
       usb::xhci::ProcessEvents();

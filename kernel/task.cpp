@@ -19,14 +19,15 @@ void SwitchTask() {
   }
   SwitchContext(current_task, old_current_task);
 }
-// #@@range_end(switchtask)
 
-// #@@range_begin(inittask)
 void InitializeTask() {
   current_task = &task_a_ctx;
 
   __asm__("cli");
+  // MEMO: task切り替えようにTimerを追加
+  // Timerについては、p277~あたり
   timer_manager->AddTimer(
+      // MEMO: tickはじまってるので、現在のtick + 0.02秒にしておく!
       Timer{timer_manager->CurrentTick() + kTaskTimerPeriod, kTaskTimerValue});
   __asm__("sti");
 }
